@@ -74,8 +74,8 @@ class PageSelectWidget(MultiWidget):
                    Select(choices=self.choices, attrs={'style': "display:none;"} ),
         )
 
-    def _build_script(self, name, value, attrs={}):
-        return r"""<script type="text/javascript">
+    def _build_script(self, name, value, attrs={}, context={}):
+        return r"""<script type="text/javascript" nonce="{nonce}">
                 var CMS = window.CMS || {};
 
                 CMS.Widgets = CMS.Widgets || {};
@@ -84,13 +84,14 @@ class PageSelectWidget(MultiWidget):
                     name: '%(name)s'
                 });
             </script>""" % {
-                'name': name
+                'name': name,
+                'nonce': context['request'].csp_nonce
             }
 
     def get_context(self, name, value, attrs):
         self._build_widgets()
         context = super(PageSelectWidget, self).get_context(name, value, attrs)
-        context['widget']['script_init'] = self._build_script(name, value, context['widget']['attrs'])
+        context['widget']['script_init'] = self._build_script(name, value, context['widget']['attrs'], context)
         return context
 
     def format_output(self, rendered_widgets):
@@ -123,8 +124,8 @@ class PageSmartLinkWidget(TextInput):
                 'You should provide an ajax_view argument that can be reversed to the PageSmartLinkWidget'
             )
 
-    def _build_script(self, name, value, attrs={}):
-        return r"""<script type="text/javascript">
+    def _build_script(self, name, value, attrs={}, context={}):
+        return r"""<script type="text/javascript" nonce="{nonce}">
             var CMS = window.CMS || {};
 
             CMS.Widgets = CMS.Widgets || {};
@@ -139,12 +140,13 @@ class PageSmartLinkWidget(TextInput):
             'element_id': attrs.get('id', ''),
             'placeholder_text': attrs.get('placeholder_text', ''),
             'language_code': self.language,
-            'ajax_url': force_text(self.ajax_url)
+            'ajax_url': force_text(self.ajax_url),
+            'nonce': context['request'].csp_nonce,
         }
 
     def get_context(self, name, value, attrs):
         context = super(PageSmartLinkWidget, self).get_context(name, value, attrs)
-        context['widget']['script_init'] = self._build_script(name, value, context['widget']['attrs'])
+        context['widget']['script_init'] = self._build_script(name, value, context['widget']['attrs'], context)
         return context
 
 
@@ -234,7 +236,7 @@ class ApplicationConfigSelect(Select):
         self.app_configs = app_configs
         super(ApplicationConfigSelect, self).__init__(attrs, choices)
 
-    def _build_script(self, name, value, attrs={}):
+    def _build_script(self, name, value, attrs={}, context={}):
         configs = []
         urls = []
         for application, cms_app in self.app_configs.items():
@@ -242,7 +244,7 @@ class ApplicationConfigSelect(Select):
                 ["['%s', '%s']" % (config.pk, escapejs(escape(config))) for config in cms_app.get_configs()])))  # noqa
         for application, cms_app in self.app_configs.items():
             urls.append("'%s': '%s'" % (application, cms_app.get_config_add_url()))
-        return r"""<script type="text/javascript">
+        return r"""<script type="text/javascript" nonce="{nonce}">
             var apphooks_configuration = {
                 %(apphooks_configurations)s
             };
@@ -254,9 +256,10 @@ class ApplicationConfigSelect(Select):
             'apphooks_configurations': ','.join(configs),
             'apphooks_url': ','.join(urls),
             'apphooks_value': value,
+            'nonce': context['request'].csp_nonce,
         }
 
     def get_context(self, name, value, attrs):
         context = super(ApplicationConfigSelect, self).get_context(name, value, attrs)
-        context['widget']['script_init'] = self._build_script(name, value, context['widget']['attrs'])
+        context['widget']['script_init'] = self._build_script(name, value, context['widget']['attrs'], context)
         return context

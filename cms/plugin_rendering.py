@@ -190,7 +190,7 @@ class ContentRenderer(BaseRenderer):
     placeholder_edit_template = (
         '{content} '
         '<div class="cms-placeholder cms-placeholder-{placeholder_id}"></div> '
-        '<script data-cms>{plugin_js}\n{placeholder_js}</script>'
+        '<script data-cms nonce="{nonce}">{plugin_js}\n{placeholder_js}</script>'
     )
 
     def __init__(self, request):
@@ -311,6 +311,7 @@ class ContentRenderer(BaseRenderer):
             'plugin_js': ''.join(plugin_toolbar_js_bits),
             'placeholder_js': placeholder_toolbar_js,
             'placeholder_id': placeholder.pk,
+            'nonce': self.request.csp_nonce,
         }
         return context
 
@@ -564,7 +565,7 @@ class StructureRenderer(BaseRenderer):
         <script data-cms id="cms-plugin-child-classes-{placeholder_id}" type="text/cms-template">
             {plugin_menu_js}
         </script>
-        <script data-cms>{plugin_js}\n{placeholder_js}</script>
+        <script data-cms nonce="{nonce}">{plugin_js}\n{placeholder_js}</script>
         """
     )
 
@@ -601,7 +602,9 @@ class StructureRenderer(BaseRenderer):
             plugin_js=plugin_js_output,
             plugin_menu_js=self.get_placeholder_plugin_menu(placeholder, page=page),
             placeholder_js=placeholder_toolbar_js,
+            nonce=self.request.csp_nonce,
         )
+        print(placeholder_structure_is)
         return mark_safe(placeholder_structure_is)
 
     def render_page_placeholder(self, page, placeholder, language=None):
@@ -650,13 +653,14 @@ class LegacyRenderer(ContentRenderer):
         <script data-cms id="cms-plugin-child-classes-{placeholder_id}" type="text/cms-template">
             {plugin_menu_js}
         </script>
-        <script data-cms>{plugin_js}\n{placeholder_js}</script>
+        <script data-cms nonce="{nonce}">{plugin_js}\n{placeholder_js}</script>
         """
     )
 
     def get_editable_placeholder_context(self, placeholder, page=None):
         context = super(LegacyRenderer, self).get_editable_placeholder_context(placeholder, page)
         context['plugin_menu_js'] = self.get_placeholder_plugin_menu(placeholder, page=page)
+        context['nonce'] = self.request.csp_nonce
         return context
 
 

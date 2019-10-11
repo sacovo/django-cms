@@ -72,7 +72,8 @@ def render_plugin_init_js(context, plugin):
     plugin_js = renderer.get_plugin_toolbar_js(plugin)
     # Add the toolbar javascript for this plugin to the
     # sekizai "js" namespace.
-    context[get_varname()]['js'].append('<script data-cms>{}</script>'.format(plugin_js))
+    nonce = context['request'].csp_nonce
+    context[get_varname()]['js'].append('<script data-cms nonce="{nonce}">{plugin_js}</script>'.format(plugin_js=plugin_js, nonce=nonce))
 
 
 class JavascriptString(Tag):

@@ -83,7 +83,7 @@
             </div>
         </div>
     {% endif %}
-    <script type="text/javascript" data-cms>
+  <script type="text/javascript" data-cms nonce="{{request.csp_nonce}}">
         var CMS = CMS || {};
         CMS._plugins = CMS._plugins || [];
     </script>

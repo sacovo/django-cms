@@ -2,7 +2,7 @@
 
 {% block extrahead %}
 {{ block.super }}
-<script>
+<script nonce="{{request.csp_nonce}}">
     // we have to wait till the window is loaded, otherwise
     // the sideframe code will override the url, because every time
     // the iframe is loaded, it's current url is saved in the settings

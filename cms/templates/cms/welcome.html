@@ -79,7 +79,7 @@
     {% render_block "js" %}
 
     {% language request.toolbar.toolbar_language %}
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         {% if user.is_authenticated %}
             CMS.$(function () {
                 var btn = CMS.$('.js-welcome-add');
