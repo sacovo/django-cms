@@ -1,2 +1,4 @@
 {% include 'django/forms/widgets/text.html' %}
+<script type="text/javascript" nonce="{{request.csp_nonce}}">
 {{ widget.script_init|safe }}
+</script>
